@@ -22,7 +22,7 @@
     }
 
     const state = change
-        || (storageEnabled && localStorage.getItem('atum-sidebar'));
+      || (storageEnabled && localStorage.getItem('atum-sidebar'));
 
     if (state === 'closed') {
       logo.classList.add('small');
@@ -55,7 +55,7 @@
       if (transitAction) {
         // Transition class depends on the width of the sidebar
         if (storageEnabled
-            && localStorage.getItem('atum-sidebar') === 'closed') {
+          && localStorage.getItem('atum-sidebar') === 'closed') {
           sidebar.classList.add(`transit-${transitAction}-closed`);
           changeLogo('small');
         } else {
@@ -91,6 +91,52 @@
     });
   }
 
+  /**
+   * adjust color of svg logos
+   *
+   * @since   4.0.0
+   */
+  function changeSVGLogoColor() {
+    const logoImgs = [].slice.call(document.querySelectorAll('.logo img'));
+
+    logoImgs.forEach((img) => {
+      const imgID = img.getAttribute('id');
+      const imgClass = img.getAttribute('class');
+      const imgURL = img.getAttribute('src');
+
+      Joomla.request({
+        url: imgURL,
+        method: 'GET',
+        onSuccess: (response) => {
+          // Get the SVG tag, ignore the rest
+          const parsedImg = new DOMParser().parseFromString(response, 'image/svg+xml');
+          const svg = parsedImg.getElementsByTagName('svg')[0];
+
+          // Add replaced image's ID to the new SVG
+          if (imgID) {
+            svg.setAttribute('id', imgID);
+          }
+
+          // Add replaced image's classes to the new SVG
+          if (imgClass) {
+            svg.setAttribute('class', `${imgClass} replaced-svg`);
+          }
+
+          // Remove any invalid XML tags as per http://validator.w3.org
+          svg.removeAttribute('xmlns:a');
+
+          // Check if the viewport is set, if the viewport is not set the SVG wont't scale.
+          if (!svg.hasAttribute('viewBox') && svg.hasAttribute('height') && svg.hasAttribute('width')) {
+            svg.setAttribute('viewBox', `0 0 ${svg.getAttribute('height')} ${svg.getAttribute('width')}`);
+          }
+
+          // Replace image with new SVG
+          img.parentElement.replaceChild(svg, img);
+        },
+      });
+    });
+  }
+
   doc.addEventListener('DOMContentLoaded', () => {
     const loginForm = doc.getElementById('form-login');
     const logoutBtn = doc.querySelector('.header-items a[href*="task=logout"]');
@@ -103,6 +149,8 @@
     const mobileTablet = window.matchMedia('(min-width: 576px) and (max-width:991.98px)');
     const mobileSmallLandscape = window.matchMedia('(max-width: 767.98px)');
     const mobileSmall = window.matchMedia('(max-width: 575.98px)');
+
+    changeSVGLogoColor();
 
     // Fade out login form when login was successful
     if (loginForm) {
@@ -136,28 +184,28 @@
 
     if (mobileSmall.matches) {
       toggleArrowIcon();
-      if(menu) {
+      if (menu) {
         wrapper.classList.remove('closed');
       }
     }
 
-    if (mobileTablet.matches && menu){
-        wrapper.classList.add('closed');
+    if (mobileTablet.matches && menu) {
+      wrapper.classList.add('closed');
     }
 
-    if(mobileSmallLandscape.matches){
-      if(sidebarNav) sidebarNav.classList.add('collapse');
-      if(subHeadToolbar) subHeadToolbar.classList.add('collapse');
+    if (mobileSmallLandscape.matches) {
+      if (sidebarNav) sidebarNav.classList.add('collapse');
+      if (subHeadToolbar) subHeadToolbar.classList.add('collapse');
     }
 
     window.addEventListener('resize', () => {
       /* eslint no-unused-expressions: ["error", { "allowTernary": true }] */
       (mobile.matches) ? changeLogo('closed') : changeLogo();
       (mobileSmall.matches) ? toggleArrowIcon() : toggleArrowIcon('top');
-      if(sidebarNav) (mobileSmallLandscape.matches)? sidebarNav.classList.add('collapse') :  sidebarNav.classList.remove('collapse');
-      if(subHeadToolbar) (mobileSmallLandscape.matches)? subHeadToolbar.classList.add('collapse') : subHeadToolbar.classList.remove('collapse');
+      if (sidebarNav) (mobileSmallLandscape.matches) ? sidebarNav.classList.add('collapse') : sidebarNav.classList.remove('collapse');
+      if (subHeadToolbar) (mobileSmallLandscape.matches) ? subHeadToolbar.classList.add('collapse') : subHeadToolbar.classList.remove('collapse');
 
-      if(menu) {
+      if (menu) {
         if (mobileSmall.matches) {
           wrapper.classList.remove('closed');
         }
@@ -165,7 +213,6 @@
           wrapper.classList.add('closed');
         }
       }
-
     });
   });
 })(window.Joomla, document);
