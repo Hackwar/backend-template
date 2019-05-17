@@ -103,7 +103,7 @@ steps:
     image: joomlaprojects/docker-systemtests:develop
     commands:
       - bash tests/Codeception/drone-system-run.sh "$(pwd)"
-    shm_size: 1024000000  
+    shm_size: 2048000000  
 
   - name: api-tests
     depends_on: [ system-tests ]
